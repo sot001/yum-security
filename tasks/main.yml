@@ -1,0 +1,16 @@
+---
+# tasks file
+- name: ensure Yum Security installed
+  yum: pkg=yum-plugin-security state=latest
+  when: ansible_os_family == "RedHat" and ansible_lsb.major_release | int >=6
+
+- name: Show security updates to be applied (append --extra-vars "doupdate='yes'" to apply them)
+  #command: yum check-update --security
+  command: yum list-security --security
+  register: yumcheck
+  when: ansible_os_family == "RedHat" and ansible_lsb.major_release | int >=6
+- debug: var=yumcheck.stdout_lines
+
+- name: Install security updates only
+  command: yum -y update-minimal --security
+  when: ansible_os_family == "RedHat" and ansible_lsb.major_release | int >=6 and doupdate == "yes"
